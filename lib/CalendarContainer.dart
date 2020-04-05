@@ -37,16 +37,7 @@ class CalendarContainer extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: <Widget>[
         Container(
-          decoration: BoxDecoration(
-              //color: Colors.red
-              ),
-          child: Text(
-            "打卡日历",
-            style: TextStyle(fontSize: 18),
-          ),
-        ),
-        Container(
-          height: 175,
+          height: 200,
           width: 175,
           padding: EdgeInsets.all(5),
           child: _buildCalendar(context),
@@ -103,6 +94,12 @@ class CalendarContainer extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
+        Container(
+          child: Center(child: Text(
+            "打卡日历",
+            style: TextStyle(fontSize: 18),
+          ),)
+        ),
         _buildTitle(),
         Wrap(
           spacing: 2,

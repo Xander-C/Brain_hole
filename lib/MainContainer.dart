@@ -9,9 +9,9 @@ class MainContainer extends StatelessWidget {
     return Column(
       children: <Widget>[
         Container(
-            padding: EdgeInsets.all(8.0),
+            padding: EdgeInsets.fromLTRB(8, 8, 8, 0),
             width: 720,
-            height: 275,
+            height: 258,
             //color: Theme.of(context).primaryColor,
             //child: Image.network("https://b-ssl.duitang.com/uploads/item/201511/16/20151116094944_nSHCc.gif"),
             child: Row(
@@ -61,7 +61,6 @@ class MainContainer extends StatelessWidget {
                 CalendarContainer()
               ],
             )),
-        Divider(),
       ],
     );
   }
