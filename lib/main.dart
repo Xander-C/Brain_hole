@@ -72,23 +72,6 @@ class MyAppState extends State<MyApp> {
     );
   }
 
-  void _pressSetting() {
-    Navigator.push(context, new MaterialPageRoute(builder: (BuildContext context) {
-      return Scaffold(
-          appBar: AppBar(
-            title: Text(
-              "设置",
-              textAlign: TextAlign.right,
-            ),
-            centerTitle: true,
-            leading:
-                IconButton(icon: new Icon(Icons.settings), onPressed: () {
-                  Navigator.pop(context);
-                }),
-          ),
-          body: Container());
-    }));
-  }
 }
 
 class CustomFloatingActionButtonLocation extends FloatingActionButtonLocation {
