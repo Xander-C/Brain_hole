@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-
 class Day {
   Day(this.date, this.currentMouth);
   int date;
@@ -9,10 +8,24 @@ class Day {
 }
 
 class CalendarContainer extends StatelessWidget {
-  static const List<int> _daysInMonth = <int>[31, -1, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-  int _getDaysInMouth(int mouth, int year){
-    if(_daysInMonth[mouth] != -1) return _daysInMonth[mouth];
-    else if((year%4==0&&year%100!=0)||(year%400==0)) return 29;
+  static const List<int> _daysInMonth = <int>[
+    31,
+    -1,
+    31,
+    30,
+    31,
+    30,
+    31,
+    31,
+    30,
+    31,
+    30,
+    31
+  ];
+  int _getDaysInMouth(int mouth, int year) {
+    if (_daysInMonth[mouth] != -1)
+      return _daysInMonth[mouth];
+    else if ((year % 4 == 0 && year % 100 != 0) || (year % 400 == 0)) return 29;
     return 28;
   }
 
@@ -59,27 +72,28 @@ class CalendarContainer extends StatelessWidget {
   }
 
   Column _buildCalendar(BuildContext context) {
-    List<Day> _initDays(BuildContext context){
+    List<Day> _initDays(BuildContext context) {
       List<Day> _days = [];
       DateTime now = new DateTime.now();
       int mouth = now.month;
       int day = now.day;
       int weekday = now.weekday;
-      int firstDayWeekday = (weekday - (day % 7) + 1 +7) % 7;
+      int firstDayWeekday = (weekday - (day % 7) + 1 + 7) % 7;
       int dayMax = _getDaysInMouth(mouth - 1, now.year);
       print(mouth);
       print(dayMax);
-      int lastMax = _getDaysInMouth((mouth + 10) % 12, now.year - (mouth+11)~/12);
+      int lastMax =
+          _getDaysInMouth((mouth + 10) % 12, now.year - (mouth + 11) ~/ 12);
       int n = lastMax - firstDayWeekday + 1;
-      for(int i = 0; i < firstDayWeekday; i++){
+      for (int i = 0; i < firstDayWeekday; i++) {
         _days.add(Day(n++, false));
       }
       n = 1;
-      for(int i = firstDayWeekday; i < dayMax + firstDayWeekday; i++){
+      for (int i = firstDayWeekday; i < dayMax + firstDayWeekday; i++) {
         _days.add(Day(n++, true));
       }
       n = 1;
-      for(int i = dayMax + firstDayWeekday; i < 42; i++){
+      for (int i = dayMax + firstDayWeekday; i < 42; i++) {
         _days.add(Day(n++, false));
       }
       return _days;
@@ -93,8 +107,8 @@ class CalendarContainer extends StatelessWidget {
         Wrap(
           spacing: 2,
           runSpacing: 2,
-          children: _days.map((Day day){
-            return _buildDay(day);
+          children: _days.map((Day day) {
+            return _buildDay(day, context);
           }).toList(),
         )
       ],
@@ -103,29 +117,39 @@ class CalendarContainer extends StatelessWidget {
 
   Row _buildTitle() {
     final List<String> dayTitles = ["日", "一", "二", "三", "四", "五", "六"];
-    Container _buildTitleDay(String day){
+    Container _buildTitleDay(String day) {
       return Container(
         width: 23.25,
         height: 23.25,
-        child: Center(child: Text(day, style: TextStyle(color: Colors.black54),)),
+        child: Center(
+            child: Text(
+          day,
+          style: TextStyle(color: Colors.black54),
+        )),
       );
     }
+
     return Row(
-      children: dayTitles.map((String day) {
+        children: dayTitles.map((String day) {
       return _buildTitleDay(day);
     }).toList());
   }
 
-  Container _buildDay(Day day) {
+  Container _buildDay(Day day, BuildContext context) {
     print(day);
     return Container(
       width: 21.5,
       height: 21.5,
       decoration: BoxDecoration(
-        color: _getDayColor(day),
+        color: _getDayColor(day, context),
         shape: BoxShape.circle,
+        border: _getBorder(day, context),
       ),
-      child: Center(child: Text(day.date.toString(), style: _getDayTextStyle(day),)),
+      child: Center(
+          child: Text(
+        day.date.toString(),
+        style: _getDayTextStyle(day),
+      )),
     );
   }
 
@@ -151,7 +175,7 @@ class CalendarContainer extends StatelessWidget {
                     value: level,
                     valueColor: new AlwaysStoppedAnimation<Color>(
                         Theme.of(context).primaryColor),
-                    backgroundColor: Colors.green[100],
+                    backgroundColor: Color(0xFFc5cae9),
                   )),
             ),
             SizedBox(
@@ -161,16 +185,26 @@ class CalendarContainer extends StatelessWidget {
         ));
   }
 
-  Color _getDayColor(Day day){
-    if(!day.currentMouth) return Colors.white;
-    return Colors.green[300]; //TODO: 设置每天的颜色
+  Color _getDayColor(Day day, BuildContext context) {
+    int i = DateTime.now().day;
+    if (day.currentMouth && i <= day.date) return Colors.white;
+    if (!day.currentMouth) return Colors.white;
+    return Theme.of(context).primaryColor; //TODO: 设置每天的颜色，未到白色，没做灰色，做了主题色
   }
 
-  TextStyle _getDayTextStyle(Day day){
-    if(!day.currentMouth) return TextStyle(color: Colors.black26);
-    return TextStyle(color: Colors.white, fontSize: 12); //TODO: 设置每天的颜色
+  Border _getBorder(Day day, BuildContext context) {
+    if (day.currentMouth && day.date == DateTime.now().day)
+      return Border.all(
+        color: Theme.of(context).primaryColor,
+        style: BorderStyle.solid,
+      );
+    else return null;
   }
 
-
+  TextStyle _getDayTextStyle(Day day) {
+    int i = DateTime.now().day;
+    if (day.currentMouth && i <= day.date) return TextStyle(color: Colors.black54);
+    if (!day.currentMouth) return TextStyle(color: Colors.black26);
+    return TextStyle(color: Colors.white, fontSize: 11);
+  }
 }
-

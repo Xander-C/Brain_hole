@@ -8,8 +8,11 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return new MaterialApp(
       title: 'Flutter Test',
-      theme: new ThemeData(primaryColor: Colors.green[300],),
+      //color: Color.fromRGBO(244, 246, 249, 1),
+      debugShowMaterialGrid: false,
+      theme: new ThemeData(primaryColor: Color.fromRGBO(103,119,239, 1),),
       home: Scaffold(
+        backgroundColor: Color.fromRGBO(244,246,249, 1),
         appBar: AppBar(
           title: Text("标题",
             textAlign: TextAlign.right,

@@ -37,7 +37,8 @@ class MainContainer extends StatelessWidget {
                               blurRadius: 1.0,
                               //spreadRadius: 1.0,
                             )
-                          ]),
+                          ]
+                      ),
                       child: Text(
                         "好久不见，想我了吗？快完成点任务吧hhhhh",
                         style: TextStyle(fontSize: 15),
