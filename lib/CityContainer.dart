@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as Http;
 import 'dart:convert';
 
+import 'package:shared_preferences/shared_preferences.dart';
+
 class CityContainer extends StatefulWidget {
   @override
   State<StatefulWidget> createState() => _CityContainerState();
@@ -95,7 +97,8 @@ class _CityContainerState extends State<CityContainer> {
       var weatherData = jsonDecode(jsonString);
       print(weatherData["data"]);
       if(weatherData != null && weatherData["data"] != null && weatherData["data"]["forecast_24h"] != null){
-        //Todo :储存天气链接
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        prefs.setString("weatherUrl", url);
         showDialog(
             context: context,
             builder: (ctx){return _showDialog(true, "设置成功");}

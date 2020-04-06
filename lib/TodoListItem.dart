@@ -1,26 +1,16 @@
 import 'package:flutter/material.dart';
 
+import 'TodoThing.dart';
+
 typedef void CartChangedCallback(TodoThing todo);
-
-class TodoThing {
-  TodoThing(this._todo, this._deadline, this._isToday, this._isDone);
-  String _todo;
-  DateTime _deadline;
-  bool _isToday;
-  bool _isDone;
-
-  void set_isDone(bool isDone){
-    this._isDone = isDone;
-  }
-}
 
 class TodoListItem extends StatelessWidget {
   TodoListItem(TodoThing todo, this.onTapCallBack, this.pressCallBack)
       : this.todo = todo,
-        this._todo = todo._todo,
-        this._deadline = todo._deadline,
-        this._isToday = todo._isToday,
-        this._isDone = todo._isDone,
+        this._todo = todo.todo,
+        this._deadline = todo.deadline,
+        this._isToday = todo.isToday,
+        this._isDone = todo.isDone,
         super(key: ObjectKey(todo));
   final TodoThing todo;
   final String _todo;
@@ -34,7 +24,7 @@ class TodoListItem extends StatelessWidget {
     return ListTile(
       title: Text(_todo, style: _getTextStyle()),
       subtitle: Text(
-        _deadline.toLocal().toString(),
+        _deadline.toLocal().toString().substring(0,16),
         style: _getTextStyle(),
       ),
       trailing: new Icon(
