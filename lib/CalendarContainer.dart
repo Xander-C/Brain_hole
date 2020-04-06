@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'dart:math';
 
 class Day {
   Day(this.date, this.currentMouth);
@@ -8,8 +9,9 @@ class Day {
 }
 
 class CalendarContainer extends StatelessWidget {
-  CalendarContainer(this.finishedList);
+  CalendarContainer(this.finishedList, this.exp);
   final List<int> finishedList;
+  final int exp;
 
   static const List<int> _daysInMonth = <int>[
     31,
@@ -59,7 +61,7 @@ class CalendarContainer extends StatelessWidget {
                 )
               ]),
         ),
-        _buildFavorRow(0.8, context)
+        _buildFavorRow(exp, context)
       ],
     );
   }
@@ -152,7 +154,16 @@ class CalendarContainer extends StatelessWidget {
     );
   }
 
-  Container _buildFavorRow(double level, BuildContext context) {
+  Container _buildFavorRow(int exp, BuildContext context) {
+
+    int _getLevel(int exp, int level){
+      if(exp<pow(5,level)) return level;
+      return _getLevel(exp, level + 1);
+    }
+
+    int level = _getLevel(exp, 1);
+    double percent = exp/pow(5, level);
+
     return Container(
         height: 20,
         width: 175,
@@ -161,7 +172,7 @@ class CalendarContainer extends StatelessWidget {
             Expanded(
                 flex: 3,
                 child: Text(
-                  "好感:1级",
+                  "好感:"+ level.toString() +"级",
                   textAlign: TextAlign.right,
                 )),
             SizedBox(width: 10.0),
@@ -171,7 +182,7 @@ class CalendarContainer extends StatelessWidget {
                   width: 175,
                   height: 15,
                   child: LinearProgressIndicator(
-                    value: level,
+                    value: percent,
                     valueColor: new AlwaysStoppedAnimation<Color>(
                         Theme.of(context).primaryColor),
                     backgroundColor: Color(0xFFc5cae9),

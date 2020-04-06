@@ -2,9 +2,16 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutterlearning2/CalendarContainer.dart';
 
+typedef void ChangeCallBack();
+
 class MainContainer extends StatelessWidget {
-  MainContainer(this.finishedList);
+  MainContainer(this.finishedList, this.exp, this.talk, this.imageChange,
+      this.talkChange);
   final List<int> finishedList;
+  final int exp;
+  final String talk;
+  final ChangeCallBack imageChange;
+  final ChangeCallBack talkChange;
 
   @override
   Widget build(BuildContext context) {
@@ -21,38 +28,48 @@ class MainContainer extends StatelessWidget {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: <Widget>[
-                    Container(
-                      margin: EdgeInsets.fromLTRB(0, 5, 0, 10),
-                      padding: EdgeInsets.all(5),
-                      width: 175,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                          border: Border.all(
-                            color: Theme.of(context).primaryColor,
-                            style: BorderStyle.solid,
-                          ),
-                          borderRadius: BorderRadius.all(Radius.circular(5.0)),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black12,
-                              offset: Offset(-2.0, 2.0),
-                              blurRadius: 1.0,
-                              //spreadRadius: 1.0,
-                            )
-                          ]
-                      ),
-                      child: Text(
-                        "好久不见，想我了吗？快完成点任务吧hhhhh",
-                        style: TextStyle(fontSize: 15),
-                        maxLines: 2,
+                    GestureDetector(
+                      onTap: (){
+                        talkChange();
+                      },
+                      child: Container(
+                        margin: EdgeInsets.fromLTRB(0, 5, 0, 10),
+                        padding: EdgeInsets.all(5),
+                        width: 175,
+                        decoration: BoxDecoration(
+                            color: Colors.white,
+                            border: Border.all(
+                              color: Theme.of(context).primaryColor,
+                              style: BorderStyle.solid,
+                            ),
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(5.0)),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black12,
+                                offset: Offset(-2.0, 2.0),
+                                blurRadius: 1.0,
+                                //spreadRadius: 1.0,
+                              )
+                            ]),
+                        child: Text(
+                          talk,
+                          style: TextStyle(fontSize: 15),
+                          maxLines: 2,
+                        ),
                       ),
                     ),
-                    Container(
-                      height: 175,
-                      //color: Colors.red,
-                      child: Image.asset(
-                        "assets/images/01.gif",
-                        fit: BoxFit.contain,
+                    GestureDetector(
+                      onTap: () {
+                        imageChange();
+                      },
+                      child: Container(
+                        height: 175,
+                        //color: Colors.red,
+                        child: Image.asset(
+                          "assets/images/01.gif",
+                          fit: BoxFit.contain,
+                        ),
                       ),
                     )
                   ],
@@ -60,7 +77,7 @@ class MainContainer extends StatelessWidget {
                 Container(
                   width: 25,
                 ),
-                CalendarContainer(finishedList)
+                CalendarContainer(finishedList, exp)
               ],
             )),
       ],
