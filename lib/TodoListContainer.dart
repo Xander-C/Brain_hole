@@ -11,17 +11,17 @@ class TodoListContainer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-        margin: EdgeInsets.all(0),
-        width: 400,
-        height: 505,
-        child: ListView(
+      margin: EdgeInsets.all(0),
+      width: 400,
+      height: 505,
+      child: ListView(
           padding: EdgeInsets.symmetric(vertical: 8.0),
-          children: _todoList.map((TodoThing todoThing) {
-            return TodoListItem(
-                todoThing,
-                onTapCallBack,
-                pressCallBack);
-          }).toList(),
-        ));
+          children: ListTile.divideTiles(
+            context: context,
+            tiles: _todoList.map((TodoThing todoThing) {
+              return TodoListItem(todoThing, onTapCallBack, pressCallBack);
+            }).toList(),
+          ).toList()),
+    );
   }
 }

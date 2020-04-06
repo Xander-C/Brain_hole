@@ -20,7 +20,7 @@ class TodoListItem extends StatelessWidget {
   final CartChangedCallback onTapCallBack;
   final CartChangedCallback pressCallBack;
   @override
-  Widget build(BuildContext context) {
+  ListTile build(BuildContext context) {
     return ListTile(
       title: Text(_todo, style: _getTextStyle()),
       subtitle: Text(
@@ -46,8 +46,8 @@ class TodoListItem extends StatelessWidget {
         color: Colors.black54,
         decoration: TextDecoration.lineThrough,
       );
-    if ((_isToday && _deadline.difference(DateTime.now()).inHours <= 2) ||
-        (!_isToday && _deadline.difference(DateTime.now()).inDays <= 2))
+    if ((_isToday && _deadline.isBefore(DateTime.now().add(Duration(hours: 2)))) ||
+        (!_isToday && _deadline.isBefore(DateTime.now().add(Duration(days: 2)))))
       return TextStyle(
         color: Colors.red,
       );

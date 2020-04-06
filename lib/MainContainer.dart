@@ -21,6 +21,9 @@ class MainContainer extends StatelessWidget {
             padding: EdgeInsets.fromLTRB(8, 8, 8, 0),
             width: 720,
             height: 258,
+            decoration: BoxDecoration(
+              color: Color.fromRGBO(244, 246, 249, 1),
+            ),
             //color: Theme.of(context).primaryColor,
             //child: Image.network("https://b-ssl.duitang.com/uploads/item/201511/16/20151116094944_nSHCc.gif"),
             child: Row(
