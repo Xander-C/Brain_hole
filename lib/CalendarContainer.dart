@@ -8,6 +8,9 @@ class Day {
 }
 
 class CalendarContainer extends StatelessWidget {
+  CalendarContainer(this.finishedList);
+  final List<int> finishedList;
+
   static const List<int> _daysInMonth = <int>[
     31,
     -1,
@@ -31,7 +34,6 @@ class CalendarContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: build calendar
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -184,9 +186,12 @@ class CalendarContainer extends StatelessWidget {
 
   Color _getDayColor(Day day, BuildContext context) {
     int i = DateTime.now().day;
-    if (day.currentMouth && i <= day.date) return Colors.white;
     if (!day.currentMouth) return Colors.white;
-    return Theme.of(context).primaryColor; //TODO: 设置每天的颜色，未到白色，没做灰色，做了主题色
+    if (i < day.date) return Colors.white;
+    if (finishedList.indexOf(day.date) != -1)
+      return Theme.of(context).primaryColor;
+    if(day.date == i) return Colors.white;
+    return Colors.black12;
   }
 
   Border _getBorder(Day day, BuildContext context) {
@@ -200,8 +205,11 @@ class CalendarContainer extends StatelessWidget {
 
   TextStyle _getDayTextStyle(Day day) {
     int i = DateTime.now().day;
-    if (day.currentMouth && i <= day.date) return TextStyle(color: Colors.black54);
     if (!day.currentMouth) return TextStyle(color: Colors.black26);
-    return TextStyle(color: Colors.white, fontSize: 11);
+    if (i < day.date) return TextStyle(color: Colors.black54);
+    if (finishedList.indexOf(day.date) != -1)
+      return TextStyle(color: Colors.white, fontSize: 11);
+    if(day.date == i) return TextStyle(color: Colors.black54);
+    return TextStyle(color: Colors.black54);
   }
 }

@@ -3,9 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutterlearning2/CalendarContainer.dart';
 
 class MainContainer extends StatelessWidget {
+  MainContainer(this.finishedList);
+  final List<int> finishedList;
+
   @override
   Widget build(BuildContext context) {
-    // TODO: 主容器
     return Column(
       children: <Widget>[
         Container(
@@ -58,7 +60,7 @@ class MainContainer extends StatelessWidget {
                 Container(
                   width: 25,
                 ),
-                CalendarContainer()
+                CalendarContainer(finishedList)
               ],
             )),
       ],

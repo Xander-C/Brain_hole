@@ -3,9 +3,10 @@ import 'package:flutter/material.dart';
 import 'TodoListItem.dart';
 
 class TodoListContainer extends StatelessWidget {
-  TodoListContainer(this._todoList, this.onTapCallBack);
+  TodoListContainer(this._todoList, this.onTapCallBack, this.pressCallBack);
   final List<TodoThing> _todoList;
   final CartChangedCallback onTapCallBack;
+  final CartChangedCallback pressCallBack;
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -17,7 +18,8 @@ class TodoListContainer extends StatelessWidget {
           children: _todoList.map((TodoThing todoThing) {
             return TodoListItem(
                 todoThing,
-                onTapCallBack);
+                onTapCallBack,
+                pressCallBack);
           }).toList(),
         ));
   }
