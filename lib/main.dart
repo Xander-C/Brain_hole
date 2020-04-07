@@ -1,5 +1,7 @@
 import 'dart:convert';
+import 'dart:math';
 import 'dart:ui';
+import 'package:analyzer/dart/ast/ast.dart';
 import 'package:http/http.dart' as Http;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -7,11 +9,17 @@ import 'package:flutterlearning2/TodoListContainer.dart';
 import 'MainContainer.dart';
 import 'CityContainer.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:convert/convert.dart';
+import 'package:crypto/crypto.dart';
+import 'package:jpush_flutter/jpush_flutter.dart';
 
 import 'TodoThing.dart';
 
 void main() => runApp(new MyStatelessApp());
 
+//Todo: 使用非对称加密传输数据
+//Todo: 服务器云储存
+//Todo: 推送
 class MyStatelessApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -31,6 +39,8 @@ class MyApp extends StatefulWidget {
 }
 
 class MyAppState extends State<MyApp> {
+  final JPush jPush = new JPush();
+  var random = Random();
   List<TodoThing> _todoList;
   List<int> finishedList;
   int exp;
@@ -47,6 +57,7 @@ class MyAppState extends State<MyApp> {
   ];
   String userKey;
 
+  @override
   void initState() {
     super.initState();
     _todoList = [TodoThing("防错", DateTime(2077), false, false)];
@@ -57,11 +68,25 @@ class MyAppState extends State<MyApp> {
     print("before init");
     imageUrl = "assets/images/01.gif";
     init();
+    initPlatformState();
+  }
+
+  Future<void> initPlatformState() async {
+    try {
+      jPush.addEventHandler(
+          onReceiveNotification: (Map<String, dynamic> message) async {
+        print(">>>>>>>>>>>>>>>>>flutter 接收到推送: $message");
+      });
+    } on Expression catch(e){
+      print("发生错误: $e");
+    }
+    if (!mounted) {
+      return;
+    }
   }
 
   void init() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-
 
     print("init todoList");
     List<String> _todoListString = prefs.getStringList("todoList");
@@ -137,6 +162,12 @@ class MyAppState extends State<MyApp> {
     return null;
   }
 
+  String generateMd5(String data) {
+    var content = new Utf8Encoder().convert(data);
+    var digest = md5.convert(content);
+    return hex.encode(digest.bytes);
+  }
+
   void _setWeatherTalk() async {
     print("weatherData");
     var response = await Http.get(weatherUrl);
@@ -167,9 +198,6 @@ class MyAppState extends State<MyApp> {
       }
     }
   }
-
-  //Todo: 服务器云储存
-  //Todo: 推送
 
   bool _allLong(List<TodoThing> _todoList) {
     int len = _todoList.length;
@@ -230,13 +258,16 @@ class MyAppState extends State<MyApp> {
   void undoneCallBack(TodoThing undone) {}
 
   void _talkChange() {
-//    setState(() {
-//      talk =
-//    });
+    setState(() {
+      talk = normalTalk[random.nextInt(normalTalk.length)];
+    });
   }
 
   void _imageChange() {
-    //Todo: 切换图片
+    setState(() {
+      imageUrl =
+          "assets/images/0" + (random.nextInt(3) + 1).toString() + ".gif";
+    });
   }
 
   void _addTask() async {
@@ -409,7 +440,12 @@ class MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return Theme(
+      data: ThemeData(
+        primaryColor: Color.fromRGBO(103, 119, 239, 1),
+      ),
+      child:
+      Scaffold(
         //backgroundColor: Color.fromRGBO(244, 246, 249, 1),
         backgroundColor: Colors.white,
         appBar: AppBar(
@@ -418,20 +454,55 @@ class MyAppState extends State<MyApp> {
             textAlign: TextAlign.right,
           ),
           centerTitle: true,
-          leading: SettingBtn(),
+          //leading: SettingBtn(),
         ),
-        body:Column(
-              children :<Widget>[
-              MainContainer(
-                  finishedList, exp, talk, _talkChange, _imageChange, imageUrl),
-              Container(
-                height: 1,
-                color: Colors.black12,
+        body: Column(
+          children: <Widget>[
+            MainContainer(
+                finishedList, exp, talk, _talkChange, _imageChange, imageUrl),
+            Container(
+              height: 1,
+              color: Colors.black12,
+            ),
+            TodoListContainer(_todoList, _todoListLongCallBack,
+                _todoListPressCallBack, undoneCallBack),
+          ],
+        ),
+        drawer: Drawer(
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: const <Widget>[
+              DrawerHeader(
+                decoration: BoxDecoration(
+                  color: Color.fromRGBO(103, 119, 239, 1),
+                ),
+                child: Text(
+                  '菜单栏',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                  ),
+                ),
               ),
-              TodoListContainer(_todoList, _todoListLongCallBack,
-                  _todoListPressCallBack, undoneCallBack),
+              ListTile(
+                leading: Icon(Icons.account_circle),
+                title: Text('账号'),
+              ),
+              ListTile(
+                leading: Icon(Icons.my_location),
+                title: Text('快递追踪'),
+              ),
+              ListTile(
+                leading: Icon(Icons.cloud_circle),
+                title: Text('云同步'),
+              ),
+              ListTile(
+                leading: Icon(Icons.settings),
+                title: Text('设置'),
+              ),
             ],
           ),
+        ),
         floatingActionButton: FloatingActionButton(
           onPressed: () {
             _addTask();
@@ -440,7 +511,7 @@ class MyAppState extends State<MyApp> {
           backgroundColor: Color.fromRGBO(103, 119, 239, 1),
         ),
         floatingActionButtonLocation: CustomFloatingActionButtonLocation(
-            FloatingActionButtonLocation.endFloat, -30, -70));
+            FloatingActionButtonLocation.endFloat, -30, -70)));
   }
 }
 

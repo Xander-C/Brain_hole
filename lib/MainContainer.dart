@@ -5,13 +5,13 @@ import 'package:flutterlearning2/CalendarContainer.dart';
 typedef void ChangeCallBack();
 
 class MainContainer extends StatelessWidget {
-  MainContainer(this.finishedList, this.exp, this.talk, this.imageChange,
-      this.talkChange, this.imageUrl);
+  MainContainer(this.finishedList, this.exp, this.talk,
+      this.talkChange, this.imageChange, this.imageUrl);
   final List<int> finishedList;
   final int exp;
   final String talk;
-  final ChangeCallBack imageChange;
   final ChangeCallBack talkChange;
+  final ChangeCallBack imageChange;
   final String imageUrl;
 
   @override
