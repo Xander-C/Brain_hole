@@ -6,12 +6,13 @@ typedef void ChangeCallBack();
 
 class MainContainer extends StatelessWidget {
   MainContainer(this.finishedList, this.exp, this.talk, this.imageChange,
-      this.talkChange);
+      this.talkChange, this.imageUrl);
   final List<int> finishedList;
   final int exp;
   final String talk;
   final ChangeCallBack imageChange;
   final ChangeCallBack talkChange;
+  final String imageUrl;
 
   @override
   Widget build(BuildContext context) {
@@ -70,7 +71,7 @@ class MainContainer extends StatelessWidget {
                         height: 175,
                         //color: Colors.red,
                         child: Image.asset(
-                          "assets/images/01.gif",
+                          imageUrl,
                           fit: BoxFit.contain,
                         ),
                       ),

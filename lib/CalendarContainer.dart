@@ -41,7 +41,7 @@ class CalendarContainer extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: <Widget>[
         Container(
-          height: 200,
+          height: 202,
           width: 175,
           padding: EdgeInsets.all(5),
           child: _buildCalendar(context),
@@ -93,7 +93,6 @@ class CalendarContainer extends StatelessWidget {
       }
       return _days;
     }
-
     List<Day> _days = _initDays(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

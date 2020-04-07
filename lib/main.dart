@@ -34,8 +34,18 @@ class MyAppState extends State<MyApp> {
   List<TodoThing> _todoList;
   List<int> finishedList;
   int exp;
-  String talk = "今天会下雨，出门记得带伞哦！";
+  String talk = "完成设定的任务后我的好感会增加，快点去吧";
   String weatherUrl;
+  String imageUrl = "assets/images/01.gif";
+  List<String> normalTalk = [
+    "完成设定的任务后我的好感会增加，快点去吧",
+    "等级够高后可以解锁我的新姿势哦(滑稽)",
+    "blbtql！blbtql！blbtql！你同意不？",
+    "就算不同意也得同意！柏老板天下第一",
+    "为什么要迫害柏老板?因为你们都在迫害他",
+    "点够1000次会有神秘奖励哦"
+  ];
+  String userKey;
 
   void initState() {
     super.initState();
@@ -45,13 +55,15 @@ class MyAppState extends State<MyApp> {
     weatherUrl =
         'http://47.98.249.99:9092/?source=xw&weather_type=forecast_24h&province=江苏&city=南京&county=栖霞区';
     print("before init");
+    imageUrl = "assets/images/01.gif";
     init();
   }
 
   void init() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
-    print("todoList");
+
+    print("init todoList");
     List<String> _todoListString = prefs.getStringList("todoList");
     if (_todoListString == null)
       _todoList = [
@@ -89,7 +101,43 @@ class MyAppState extends State<MyApp> {
     if (weatherUrl == null)
       weatherUrl =
           'http://47.98.249.99:9092/?source=xw&weather_type=forecast_24h&province=江苏&city=南京&county=栖霞区';
+    TodoThing notDone = _getNotDone(_todoList);
+    if (notDone == null) {
+      if (_todoList.isNotEmpty) {
+        if (_todoList.length <= 5)
+          talk = "加油加油！快要全部完成了，再坚持一会儿";
+        else if (_todoList.length <= 8)
+          talk = "任务量适中，赶紧努力去完成吧";
+        else if (_todoList.length > 8) talk = "今天任务量有点艰巨，努力去完成吧";
+        imageUrl = "assets/images/study.gif";
+      }
+      _setWeatherTalk();
+    } else {
+      if (finishedList.contains(notDone.deadline.day)) {
+        finishedList.remove(notDone.deadline.day);
+      }
+      if (DateTime.now().hour >= 23) {
+        talk = "今天有任务没完成哦，无论如何还是准备睡觉吧，明天再肝";
+      } else {
+        talk = "你这人怎么这样，自己设立的任务都不能完成";
+      }
+      exp -= 30;
+    }
+    setState(() {
+      imageUrl = imageUrl;
+      talk = talk;
+      exp = exp;
+    });
+  }
 
+  TodoThing _getNotDone(List<TodoThing> _todoList) {
+    int len = _todoList.length;
+    for (int i = 0; i < len; i++)
+      if (_todoList[i].deadline.isAfter(DateTime.now())) return _todoList[i];
+    return null;
+  }
+
+  void _setWeatherTalk() async {
     print("weatherData");
     var response = await Http.get(weatherUrl);
     var weatherData = jsonDecode(response.body);
@@ -109,24 +157,23 @@ class MyAppState extends State<MyApp> {
         talk = "今天白天有雨，白天出门记得带上伞哦";
       } else if (nightWeatherCode >= 3 && nightWeatherCode <= 12) {
         talk = "今天晚上有雨，晚上出门记得带上伞哦";
-      } else if( _todoList.isNotEmpty ){
+      } else if (_todoList.isNotEmpty) {
         talk = "还有一些事没做完，就现在完成它们吧!";
+      } else if (int.parse(
+              weatherData["data"]["forecast_24h"]["1"]["max_degree"]) >
+          35) {
+        talk = "今天天气很热，不宜做太多户外活动哦";
+        imageUrl = "assets/images/hot.gif";
       }
-      setState(() {
-        talk = talk;
-      });
     }
   }
 
-  //Todo: 打开app时检测是否有昨天的任务未完成，有则删除昨天的完成记录。
-  //Todo: 服务器云储存，先发登录请求获取最近同步时间，然后选择pull或push。
+  //Todo: 服务器云储存
   //Todo: 推送
 
   bool _allLong(List<TodoThing> _todoList) {
     int len = _todoList.length;
-    for (int i; i < len; i++) {
-      if (_todoList[i].isToday) return false;
-    }
+    for (int i; i < len; i++) if (_todoList[i].isToday) return false;
     return true;
   }
 
@@ -160,24 +207,32 @@ class MyAppState extends State<MyApp> {
 
   void _todoListPressCallBack(TodoThing todo) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      int index = _todoList.indexOf(todo);
-      TodoThing temp = _todoList[index];
+    int index = _todoList.indexOf(todo);
+    TodoThing temp = _todoList[index];
+    if (!temp.isDone) {
       _todoList.removeAt(index);
       temp.isDone = true;
       _todoList.insert(index, temp);
       exp += 5;
-    });
-    prefs.setStringList(
-        "todoList",
-        _todoList.map((TodoThing todo) {
-          return json.encode(todo);
-        }).toList());
-    prefs.setInt("exp", exp);
+      prefs.setStringList(
+          "todoList",
+          _todoList.map((TodoThing todo) {
+            return json.encode(todo);
+          }).toList());
+      prefs.setInt("exp", exp);
+      setState(() {
+        _todoList = _todoList;
+        exp = exp;
+      });
+    }
   }
 
+  void undoneCallBack(TodoThing undone) {}
+
   void _talkChange() {
-    //Todo: 切换说的话
+//    setState(() {
+//      talk =
+//    });
   }
 
   void _imageChange() {
@@ -256,7 +311,12 @@ class MyAppState extends State<MyApp> {
                                     .add(new Duration(days: 90)),
                               ).then((DateTime val) {
                                 setState(() {
-                                  selectedDate = DateTime(val.year, val.month, val.day, selectedDate.hour, selectedDate.minute);
+                                  selectedDate = DateTime(
+                                      val.year,
+                                      val.month,
+                                      val.day,
+                                      selectedDate.hour,
+                                      selectedDate.minute);
                                 });
                                 print(selectedDate);
                               }).catchError((err) {
@@ -351,7 +411,7 @@ class MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return Scaffold(
         //backgroundColor: Color.fromRGBO(244, 246, 249, 1),
-      backgroundColor: Colors.white,
+        backgroundColor: Colors.white,
         appBar: AppBar(
           title: Text(
             "标题",
@@ -360,20 +420,18 @@ class MyAppState extends State<MyApp> {
           centerTitle: true,
           leading: SettingBtn(),
         ),
-        body: Container(
-          height: 764,
-          child: Column(
-            children: <Widget>[
-              MainContainer(finishedList, exp, talk, _talkChange, _imageChange),
+        body:Column(
+              children :<Widget>[
+              MainContainer(
+                  finishedList, exp, talk, _talkChange, _imageChange, imageUrl),
               Container(
                 height: 1,
                 color: Colors.black12,
               ),
-              TodoListContainer(
-                  _todoList, _todoListLongCallBack, _todoListPressCallBack),
+              TodoListContainer(_todoList, _todoListLongCallBack,
+                  _todoListPressCallBack, undoneCallBack),
             ],
           ),
-        ),
         floatingActionButton: FloatingActionButton(
           onPressed: () {
             _addTask();

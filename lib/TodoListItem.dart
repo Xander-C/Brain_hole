@@ -5,7 +5,7 @@ import 'TodoThing.dart';
 typedef void CartChangedCallback(TodoThing todo);
 
 class TodoListItem extends StatelessWidget {
-  TodoListItem(TodoThing todo, this.onTapCallBack, this.pressCallBack)
+  TodoListItem(TodoThing todo, this.onTapCallBack, this.pressCallBack, this.undoneCallBack)
       : this.todo = todo,
         this._todo = todo.todo,
         this._deadline = todo.deadline,
@@ -19,6 +19,7 @@ class TodoListItem extends StatelessWidget {
   final bool _isDone;
   final CartChangedCallback onTapCallBack;
   final CartChangedCallback pressCallBack;
+  final CartChangedCallback undoneCallBack;
   @override
   ListTile build(BuildContext context) {
     return ListTile(
@@ -46,6 +47,12 @@ class TodoListItem extends StatelessWidget {
         color: Colors.black54,
         decoration: TextDecoration.lineThrough,
       );
+    if(_deadline.isBefore(DateTime.now())){
+      undoneCallBack(todo);
+      return TextStyle(
+        color: Colors.black26,
+      );
+    }
     if ((_isToday && _deadline.isBefore(DateTime.now().add(Duration(hours: 2)))) ||
         (!_isToday && _deadline.isBefore(DateTime.now().add(Duration(days: 2)))))
       return TextStyle(
