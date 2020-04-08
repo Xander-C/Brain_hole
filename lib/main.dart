@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'dart:math';
 import 'dart:ui';
 import 'package:analyzer/dart/ast/ast.dart';
+import 'package:flutterlearning2/HomePage.dart';
+import 'package:flutterlearning2/Setting.dart';
 import 'package:http/http.dart' as Http;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -13,11 +15,11 @@ import 'package:convert/convert.dart';
 import 'package:crypto/crypto.dart';
 import 'package:jpush_flutter/jpush_flutter.dart';
 
+import 'MyDrawer.dart';
 import 'TodoThing.dart';
 
 void main() => runApp(new MyStatelessApp());
 
-//Todo: 使用非对称加密传输数据
 //Todo: 服务器云储存
 //Todo: 推送
 class MyStatelessApp extends StatelessWidget {
@@ -60,6 +62,7 @@ class MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
+    String userKey = "0";
     _todoList = [TodoThing("防错", DateTime(2077), false, false)];
     exp = 0;
     finishedList = [999];
@@ -77,7 +80,7 @@ class MyAppState extends State<MyApp> {
           onReceiveNotification: (Map<String, dynamic> message) async {
         print(">>>>>>>>>>>>>>>>>flutter 接收到推送: $message");
       });
-    } on Expression catch(e){
+    } on Expression catch (e) {
       print("发生错误: $e");
     }
     if (!mounted) {
@@ -93,7 +96,7 @@ class MyAppState extends State<MyApp> {
     if (_todoListString == null)
       _todoList = [
         TodoThing(
-            "添加第一个项目吧", DateTime.now().add(Duration(days: 1)), false, false)
+            "添加第一个项目吧", DateTime.now().add(Duration(days: 3)), false, false)
       ];
     else {
       setState(() {
@@ -441,77 +444,43 @@ class MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return Theme(
-      data: ThemeData(
-        primaryColor: Color.fromRGBO(103, 119, 239, 1),
-      ),
-      child:
-      Scaffold(
-        //backgroundColor: Color.fromRGBO(244, 246, 249, 1),
-        backgroundColor: Colors.white,
-        appBar: AppBar(
-          title: Text(
-            "标题",
-            textAlign: TextAlign.right,
-          ),
-          centerTitle: true,
-          //leading: SettingBtn(),
+        data: ThemeData(
+          primaryColor: Color.fromRGBO(103, 119, 239, 1),
         ),
-        body: Column(
-          children: <Widget>[
-            MainContainer(
-                finishedList, exp, talk, _talkChange, _imageChange, imageUrl),
-            Container(
-              height: 1,
-              color: Colors.black12,
+        child: Scaffold(
+            //backgroundColor: Color.fromRGBO(244, 246, 249, 1),
+            backgroundColor: Colors.white,
+            appBar: AppBar(
+              title: Text(
+                "主页",
+                textAlign: TextAlign.right,
+              ),
+              centerTitle: true,
+              //leading: SettingBtn(),
             ),
-            TodoListContainer(_todoList, _todoListLongCallBack,
-                _todoListPressCallBack, undoneCallBack),
-          ],
-        ),
-        drawer: Drawer(
-          child: ListView(
-            padding: EdgeInsets.zero,
-            children: const <Widget>[
-              DrawerHeader(
-                decoration: BoxDecoration(
-                  color: Color.fromRGBO(103, 119, 239, 1),
+            body: Column(
+              children: <Widget>[
+                MainContainer(finishedList, exp, talk, _talkChange,
+                    _imageChange, imageUrl),
+                Container(
+                  height: 1,
+                  color: Colors.black12,
                 ),
-                child: Text(
-                  '菜单栏',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 24,
-                  ),
-                ),
-              ),
-              ListTile(
-                leading: Icon(Icons.account_circle),
-                title: Text('账号'),
-              ),
-              ListTile(
-                leading: Icon(Icons.my_location),
-                title: Text('快递追踪'),
-              ),
-              ListTile(
-                leading: Icon(Icons.cloud_circle),
-                title: Text('云同步'),
-              ),
-              ListTile(
-                leading: Icon(Icons.settings),
-                title: Text('设置'),
-              ),
-            ],
-          ),
-        ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            _addTask();
-          },
-          child: Icon(Icons.add),
-          backgroundColor: Color.fromRGBO(103, 119, 239, 1),
-        ),
-        floatingActionButtonLocation: CustomFloatingActionButtonLocation(
-            FloatingActionButtonLocation.endFloat, -30, -70)));
+                TodoListContainer(_todoList, _todoListLongCallBack,
+                    _todoListPressCallBack, undoneCallBack),
+              ],
+            ),
+            drawer: MyDrawer(),
+            floatingActionButton: FloatingActionButton(
+              onPressed: () {
+                _addTask();
+              },
+              child: Icon(Icons.add),
+              backgroundColor: Color.fromRGBO(103, 119, 239, 1),
+            ),
+            floatingActionButtonLocation: CustomFloatingActionButtonLocation(
+                FloatingActionButtonLocation.endFloat, -30, -70))
+                );
   }
 }
 
@@ -525,64 +494,5 @@ class CustomFloatingActionButtonLocation extends FloatingActionButtonLocation {
   Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
     Offset offset = location.getOffset(scaffoldGeometry);
     return Offset(offset.dx + offsetX, offset.dy + offsetY);
-  }
-}
-
-class SettingBtn extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return IconButton(
-        icon: new Icon(Icons.settings),
-        onPressed: () {
-          Navigator.of(context).push(MaterialPageRoute(builder: (context) {
-            return Scaffold(
-              appBar: AppBar(
-                title: Text("设置"),
-                centerTitle: true,
-              ),
-              body: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[
-                  Center(
-                    child: Container(
-                        height: 170,
-                        width: 375,
-                        margin: EdgeInsets.fromLTRB(0, 15, 0, 0),
-                        padding: EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                            color: Colors.white,
-                            border: Border.all(
-                              color: Theme.of(context).primaryColor,
-                              style: BorderStyle.solid,
-                            ),
-                            borderRadius:
-                                BorderRadius.all(Radius.circular(5.0)),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black12,
-                                offset: Offset(-2.0, 2.0),
-                                blurRadius: 1.0,
-                                //spreadRadius: 1.0,
-                              )
-                            ]),
-                        child: Column(
-                          children: <Widget>[
-                            Center(
-                              child: Text(
-                                "城市设置",
-                                style: TextStyle(fontSize: 18),
-                              ),
-                            ),
-                            Container(
-                              child: CityContainer(),
-                            )
-                          ],
-                        )),
-                  )
-                ],
-              ),
-            );
-          }));
-        });
   }
 }

@@ -57,6 +57,7 @@ flutter:
     - assets/images/04.gif
     - assets/images/study.gif
     - assets/images/hot.gif
+    - assets/images/login.gif
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
