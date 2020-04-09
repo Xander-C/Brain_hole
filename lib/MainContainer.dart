@@ -25,8 +25,6 @@ class MainContainer extends StatelessWidget {
             decoration: BoxDecoration(
               color: Color.fromRGBO(244, 246, 249, 1),
             ),
-            //color: Theme.of(context).primaryColor,
-            //child: Image.network("https://b-ssl.duitang.com/uploads/item/201511/16/20151116094944_nSHCc.gif"),
             child: Row(
               children: <Widget>[
                 Column(

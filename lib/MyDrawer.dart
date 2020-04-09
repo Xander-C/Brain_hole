@@ -1,13 +1,13 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutterlearning2/Account.dart';
+import 'package:flutterlearning2/CloudSync.dart';
 
 import 'Setting.dart';
 
 class MyDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
     return Drawer(
       child: ListView(
         padding: EdgeInsets.zero,
@@ -26,7 +26,7 @@ class MyDrawer extends StatelessWidget {
           ),
           ListTile(
             leading: Icon(Icons.list),
-            title: Text('首页'),
+            title: Text('主页'),
               onTap: () {
                 Navigator.of(context)
                   ..pop();
@@ -37,7 +37,6 @@ class MyDrawer extends StatelessWidget {
             title: Text('账号'),
               onTap: () {
                 Navigator.of(context)
-                  ..pop()
                   ..push(MaterialPageRoute(builder: (context) {
                     return Account();
                   }));
@@ -50,13 +49,18 @@ class MyDrawer extends StatelessWidget {
           ListTile(
             leading: Icon(Icons.cloud_circle),
             title: Text('云同步'),
+              onTap: () {
+                Navigator.of(context)
+                  ..push(MaterialPageRoute(builder: (context) {
+                    return CloudSync();
+                  }));
+              }
           ),
           ListTile(
               leading: Icon(Icons.settings),
               title: Text('设置'),
               onTap: () {
                 Navigator.of(context)
-                  ..pop()
                   ..push(MaterialPageRoute(builder: (context) {
                     return Setting();
                   }));

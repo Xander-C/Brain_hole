@@ -2,31 +2,27 @@ import 'dart:convert';
 import 'dart:math';
 import 'dart:ui';
 import 'package:analyzer/dart/ast/ast.dart';
-import 'package:flutterlearning2/HomePage.dart';
-import 'package:flutterlearning2/Setting.dart';
 import 'package:http/http.dart' as Http;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutterlearning2/TodoListContainer.dart';
-import 'MainContainer.dart';
-import 'CityContainer.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:convert/convert.dart';
-import 'package:crypto/crypto.dart';
 import 'package:jpush_flutter/jpush_flutter.dart';
+import 'package:dio/dio.dart';
 
 import 'MyDrawer.dart';
 import 'TodoThing.dart';
+import 'MainContainer.dart';
+import 'String2DateTime.dart';
 
 void main() => runApp(new MyStatelessApp());
 
-//Todo: 服务器云储存
 //Todo: 推送
 class MyStatelessApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new MaterialApp(
-        title: 'Flutter Test',
+        title: '为了小b的幸福',
         debugShowMaterialGrid: false,
         theme: new ThemeData(
           primaryColor: Color.fromRGBO(103, 119, 239, 1),
@@ -58,12 +54,19 @@ class MyAppState extends State<MyApp> {
     "点够1000次会有神秘奖励哦"
   ];
   String userKey;
+  DateTime lastChange;
+  String regId;
+
+  FocusNode _focusNodeUserName = new FocusNode();
 
   @override
   void initState() {
     super.initState();
+    initPlatformState();
     String userKey = "0";
-    _todoList = [TodoThing("防错", DateTime(2077), false, false)];
+    print("init");
+    print(userKey);
+    _todoList = [TodoThing("添加第一个项目吧", DateTime(2077), false, false)];
     exp = 0;
     finishedList = [999];
     weatherUrl =
@@ -71,10 +74,10 @@ class MyAppState extends State<MyApp> {
     print("before init");
     imageUrl = "assets/images/01.gif";
     init();
-    initPlatformState();
   }
 
   Future<void> initPlatformState() async {
+    jPush.setup(appKey: "2f7c9abd2e325f3df5c73a46" ,channel: 'developer-default');
     try {
       jPush.addEventHandler(
           onReceiveNotification: (Map<String, dynamic> message) async {
@@ -91,20 +94,54 @@ class MyAppState extends State<MyApp> {
   void init() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
-    print("init todoList");
+    userKey = prefs.getString("userKey");
+    if (userKey == null) {
+      userKey = "0";
+      prefs.setString("userKey", "0");
+    }
+
+    String lastChangeString = prefs.getString("lastChange");
+    if (lastChangeString == null) {
+      lastChange = DateTime.now();
+      prefs.setString("lastChange", lastChange.toLocal().toString());
+    } else
+      lastChange = toDateTime(lastChangeString);
+    
+    String server = prefs.get("server");
+    if(server == null){
+      prefs.setString("server", "192.168.1.23:9094");
+    }
+
+    regId = prefs.getString("regId");
+    if (regId == null) {
+      regId = await jPush.getRegistrationID();
+      prefs.setString("regId", regId);
+    }
+
     List<String> _todoListString = prefs.getStringList("todoList");
-    if (_todoListString == null)
+    if (_todoListString == null) {
       _todoList = [
         TodoThing(
             "添加第一个项目吧", DateTime.now().add(Duration(days: 3)), false, false)
       ];
-    else {
+      prefs.setStringList(
+          "todoList",
+          _todoList.map((TodoThing todo) {
+            return json.encode(todo);
+          }).toList());
+      setState(() {
+        _todoList = _todoList;
+      });
+    } else {
       setState(() {
         _todoList = _todoListString.map((String todoStr) {
-          return TodoThing.fromJson(jsonDecode(todoStr));
+          return TodoThing.fromJson(json.decode(todoStr));
         }).toList();
       });
     }
+    print(jsonEncode (TodoThing(
+        "添加第一个项目吧", DateTime.now().add(Duration(days: 3)), false, false)
+    ));
     print(_todoListString);
     List<String> _finishedListString = prefs.getStringList("finishedList");
     print("finishedList");
@@ -112,23 +149,28 @@ class MyAppState extends State<MyApp> {
     if (_finishedListString != null && _finishedListString.length != 0) {
       setState(() {
         finishedList = _finishedListString.map((String finishedStr) {
-          print(finishedStr);
           return int.parse(finishedStr);
         }).toList();
       });
-    }
+    } else
+      prefs.setStringList("todoList", []);
 
     print("exp");
     setState(() {
       exp = prefs.getInt("exp");
-      if (exp == null) exp = 0;
+      if (exp == null) {
+        prefs.setInt("exp", 0);
+        exp = 0;
+      }
     });
 
     print("weatherUrl");
     weatherUrl = prefs.getString("weatherUrl");
-    if (weatherUrl == null)
+    if (weatherUrl == null) {
       weatherUrl =
           'http://47.98.249.99:9092/?source=xw&weather_type=forecast_24h&province=江苏&city=南京&county=栖霞区';
+      prefs.setString("weatherUrl", weatherUrl);
+    }
     TodoThing notDone = _getNotDone(_todoList);
     if (notDone == null) {
       if (_todoList.isNotEmpty) {
@@ -165,12 +207,6 @@ class MyAppState extends State<MyApp> {
     return null;
   }
 
-  String generateMd5(String data) {
-    var content = new Utf8Encoder().convert(data);
-    var digest = md5.convert(content);
-    return hex.encode(digest.bytes);
-  }
-
   void _setWeatherTalk() async {
     print("weatherData");
     var response = await Http.get(weatherUrl);
@@ -204,7 +240,7 @@ class MyAppState extends State<MyApp> {
 
   bool _allLong(List<TodoThing> _todoList) {
     int len = _todoList.length;
-    for (int i; i < len; i++) if (_todoList[i].isToday) return false;
+    for (int i = 0; i < len; i++) if (_todoList[i].isToday) return false;
     return true;
   }
 
@@ -234,6 +270,26 @@ class MyAppState extends State<MyApp> {
         _todoList.map((TodoThing todo) {
           return json.encode(todo);
         }).toList());
+    lastChange = DateTime.now();
+    FormData data = FormData.fromMap({
+      'userKey': getMd5(userKey),
+      'todoList': _todoList
+        .map((TodoThing todo) {
+    return json.encode(todo);
+    })
+        .toList()
+        .toString(),
+      'lastChange': lastChange.toLocal().toString(),
+      'finishedList': finishedList.map((int i) {
+        return i.toString();
+      }).toList().toString(),
+      'exp': exp,
+    });
+    var dio = Dio();
+    print("posting data");
+    if(userKey != "0")
+      var response =
+          await dio.post('http://'+ prefs.getString("server") +'/update', data: data);
   }
 
   void _todoListPressCallBack(TodoThing todo) async {
@@ -255,6 +311,23 @@ class MyAppState extends State<MyApp> {
         _todoList = _todoList;
         exp = exp;
       });
+      lastChange = DateTime.now();
+      FormData data = FormData.fromMap({
+        'userKey': getMd5(userKey),
+        'todoList':_todoList
+          .map((TodoThing todo) {
+      return json.encode(todo);
+      })
+          .toList()
+          .toString(),
+        'lastChange': lastChange.toLocal().toString(),
+        'exp': exp,
+      });
+      var dio = Dio();
+      print("posting data");
+      if(userKey!="0")
+      var response =
+          await dio.post('http://'+ prefs.getString("server") +'/update', data: data);
     }
   }
 
@@ -266,10 +339,20 @@ class MyAppState extends State<MyApp> {
     });
   }
 
-  void _imageChange() {
+  void _imageChange() async{
     setState(() {
       imageUrl =
-          "assets/images/0" + (random.nextInt(3) + 1).toString() + ".gif";
+          "assets/images/0" + (random.nextInt(4) + 1).toString() + ".gif";
+    });
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await syncByCloud("wdnmdhhh");
+    print("!!!!!!!!!!!!!!!!!finished lIst");
+    print(prefs.getStringList("finishedList").toString());
+    setState(() {
+      finishedList = prefs.getStringList("finishedList").map((String str){
+        return int.parse(str);
+      }).toList();
+      exp = prefs.getInt("exp");
     });
   }
 
@@ -295,6 +378,7 @@ class MyAppState extends State<MyApp> {
                         width: 150,
                         child: TextField(
                           controller: todoController,
+                          focusNode: _focusNodeUserName,
                           keyboardType: TextInputType.text,
                           decoration: InputDecoration(
                             contentPadding: EdgeInsets.all(10.0),
@@ -336,6 +420,7 @@ class MyAppState extends State<MyApp> {
                           RaisedButton(
                             child: Text('选择日期'),
                             onPressed: () {
+                              _focusNodeUserName.unfocus();
                               showDatePicker(
                                 context: context,
                                 initialDate: new DateTime.now(),
@@ -369,6 +454,7 @@ class MyAppState extends State<MyApp> {
                           RaisedButton(
                             child: new Text('选择时间'),
                             onPressed: () {
+                              _focusNodeUserName.unfocus();
                               showTimePicker(
                                 context: context,
                                 initialTime: new TimeOfDay.now(),
@@ -438,6 +524,23 @@ class MyAppState extends State<MyApp> {
           _todoList.map((TodoThing todo) {
             return json.encode(todo);
           }).toList());
+      lastChange = DateTime.now();
+      FormData data = FormData.fromMap({
+        'userKey': getMd5(userKey),
+        'todoList': _todoList
+            .map((TodoThing todo) {
+              return json.encode(todo);
+            })
+            .toList()
+            .toString(),
+        'lastChange': lastChange.toLocal().toString(),
+      });
+      var dio = Dio();
+      print("adding data");
+      if(userKey!="0")
+      var response =
+          await dio.post('http://'+ prefs.getString("server") +'/update', data: data);
+      print("added data");
     }
   }
 
@@ -456,6 +559,13 @@ class MyAppState extends State<MyApp> {
                 textAlign: TextAlign.right,
               ),
               centerTitle: true,
+              actions: <Widget>[
+                IconButton(
+                    icon:Icon(Icons.refresh),
+                    onPressed: () {
+                     init();
+                    }),
+              ],
               //leading: SettingBtn(),
             ),
             body: Column(
@@ -479,8 +589,7 @@ class MyAppState extends State<MyApp> {
               backgroundColor: Color.fromRGBO(103, 119, 239, 1),
             ),
             floatingActionButtonLocation: CustomFloatingActionButtonLocation(
-                FloatingActionButtonLocation.endFloat, -30, -70))
-                );
+                FloatingActionButtonLocation.endFloat, -30, -70)));
   }
 }
 
