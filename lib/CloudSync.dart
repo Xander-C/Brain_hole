@@ -1,5 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutterlearning2/Account.dart';
+import 'package:flutterlearning2/Setting.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:dio/dio.dart';
 import 'String2DateTime.dart';
@@ -18,17 +20,103 @@ class _CloudSyncState extends State<CloudSync> {
   void check()async{
     SharedPreferences prefs = await SharedPreferences.getInstance();
     userKey = prefs.getString("userKey");
+    if(userKey == "0"){
+      Navigator.of(context).pop();
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('请先登录'),
+            content: SingleChildScrollView(
+
+            ),
+            actions: <Widget>[
+              FlatButton(
+                child: Text('确定'),
+                onPressed: () {
+                  Navigator.of(context)..pop()..push(MaterialPageRoute(builder: (context) {
+                    return Account();
+                  }));
+                },
+              ),
+            ],
+          );
+        },
+      );
+    }
     localTimeString = prefs.getString("lastChange");
     DateTime localTime = toDateTime(localTimeString);
     FormData data = FormData.fromMap({
       'userKey': getMd5(prefs.getString("userKey")),
     });
     var dio = Dio();
-    print("posting data");
+    print("check posting data");
     response = await dio.post('http://'+ prefs.getString("server") +'/login', data: data);
     if(response.statusCode == 200){
-      DateTime cloudTime = toDateTime(response.data);
-      isSync = cloudTime == localTime;
+      if(response.data[4]=='-') {
+        DateTime cloudTime = toDateTime(response.data);
+        isSync = cloudTime == localTime;
+      }else{
+        Navigator.of(context).pop();
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text('为找到云端数据'),
+              content: SingleChildScrollView(
+                child: ListBody(
+                  children: <Widget>[
+                    Text('请退出登录后重新注册'),
+                  ],
+                ),
+              ),
+              actions: <Widget>[
+                FlatButton(
+                  child: Text('确定'),
+                  onPressed: () {
+                    Navigator.of(context)..pop();
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      }
+    }else{
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('网络错误'),
+            content: SingleChildScrollView(
+              child: ListBody(
+                children: <Widget>[
+                  Text('请检查服务器设置或稍后尝试'),
+                ],
+              ),
+            ),
+            actions: <Widget>[
+              FlatButton(
+                child: Text('确定'),
+                onPressed: () {
+                  Navigator.of(context)..pop();
+                },
+              ),
+              FlatButton(
+                child: Text('检查服务器'),
+                onPressed: () {
+                  Navigator.of(context)..pop()..push(MaterialPageRoute(builder: (context) {
+                    return Setting();
+                  }));
+                },
+              ),
+            ],
+          );
+        },
+      );
     }
     setState(() {
       isSync=isSync;
@@ -37,6 +125,7 @@ class _CloudSyncState extends State<CloudSync> {
 
   @override
   Widget build(BuildContext context) {
+    check();
     return Scaffold(
         appBar: AppBar(
           title: Text("云同步"),
@@ -49,7 +138,7 @@ class _CloudSyncState extends State<CloudSync> {
             flex: 1,
           ),
           Container(
-              constraints: BoxConstraints.expand(height: 120, width: 350),
+              constraints: BoxConstraints.expand(height: 190, width: 350),
               padding: EdgeInsets.only(left: 20, right: 20),
               decoration: BoxDecoration(
                   color: Colors.white,
@@ -86,7 +175,7 @@ class _CloudSyncState extends State<CloudSync> {
                   isSync?Container(width: 1,height: 1,):Container(
                     child: Column(children: <Widget>[
                       FlatButton(
-                        child: Text(response.data.toString().substring(0, 19) + "(云端)"),
+                        child: Text(response.data.toString().substring(0, 19) + "(云端)", style: TextStyle(color: Theme.of(context).primaryColor),),
                         onPressed: () {
                           syncByCloud(userKey);
                           Navigator.of(context)..pop()..pop();
@@ -94,7 +183,7 @@ class _CloudSyncState extends State<CloudSync> {
                       ),
                       FlatButton(
                         child: Text(
-                            localTimeString.substring(0, 19) + "(本地)"),
+                            localTimeString.substring(0, 19) + "(本地)", style: TextStyle(color: Theme.of(context).primaryColor),),
                         onPressed: () {
                           syncByLocal(userKey);
                           Navigator.of(context)..pop()..pop();

@@ -53,8 +53,9 @@ class MyAppState extends State<MyApp> {
     "点够1000次会有神秘奖励哦"
   ];
   String userKey;
-  DateTime lastChange;
+  DateTime lastChange = DateTime.now();
   String regId;
+  String server = "47.98.249.99:9094";
 
   FocusNode _focusNodeUserName = new FocusNode();
 
@@ -101,12 +102,13 @@ class MyAppState extends State<MyApp> {
     }
   }
 
-  void refresh(){
-    print("refresh 105");
+  void refresh()async{
+    SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      finishedList =finishedList;
-      _todoList = _todoList;
-      exp = exp;
+      finishedList = prefs.getStringList("finishedList").map((String i){
+        return int.parse(i);
+      }).toList();
+      exp = prefs.getInt("exp");
     });
   }
 
@@ -130,7 +132,7 @@ class MyAppState extends State<MyApp> {
       lastChange = toDateTime(lastChangeString);
     print("lastChange ="+ lastChangeString +"main 111 async");
 
-    String server = await prefs.get("server");
+    server = await prefs.get("server");
     if(server == null){
       prefs.setString("server", "47.98.249.99:9094");
     }
@@ -245,7 +247,6 @@ class MyAppState extends State<MyApp> {
       prefs.setString("regId", regId);
     }
     print("regId = "+ regId +"main 250 async init");
-    refresh();
   }
 
   TodoThing _getNotDone(List<TodoThing> _todoList) {
@@ -344,6 +345,7 @@ class MyAppState extends State<MyApp> {
   }
 
   void _todoListPressCallBack(TodoThing todo) async {
+    print("exp"+exp.toString());
     SharedPreferences prefs = await SharedPreferences.getInstance();
     int index = _todoList.indexOf(todo);
     TodoThing temp = _todoList[index];
@@ -351,18 +353,18 @@ class MyAppState extends State<MyApp> {
       _todoList.removeAt(index);
       temp.isDone = true;
       _todoList.insert(index, temp);
-      exp += 5;
       prefs.setStringList(
           "todoList",
           _todoList.map((TodoThing todo) {
             return json.encode(todo);
           }).toList());
-      prefs.setInt("exp", exp);
       setState(() {
         _todoList = _todoList;
-        exp = exp;
+        exp += 5;
       });
+      prefs.setInt("exp", exp);
       lastChange = DateTime.now();
+      prefs.setString("lastChange", lastChange.toLocal().toString());
       FormData data = FormData.fromMap({
         'userKey': getMd5(userKey),
         'todoList':_todoList
@@ -390,19 +392,10 @@ class MyAppState extends State<MyApp> {
     });
   }
 
-  void _imageChange()async{
-    SharedPreferences prefs = await SharedPreferences.getInstance();
+  void _imageChange(){
     setState(() {
       imageUrl =
           "assets/images/0" + (random.nextInt(4) + 1).toString() + ".gif";
-    });
-    print(finishedList);
-    print("这个是更改图片时的finishedlist");
-    setState(() {
-      finishedList = prefs.getStringList("finishedList").map((String i){
-        return int.parse(i);
-      }).toList();
-      print(finishedList);
     });
   }
 
