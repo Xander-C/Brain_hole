@@ -48,10 +48,6 @@
 
 <img src="./images/05.jpg" height=400px>
 
-## 已知bug
-
-1. 第一次打开app进行登录可能会出现问题，建议安装后杀掉后台后重启app2到3次，该问题有点玄学还不会修，希望有大佬提pr。
-
 
 
 如若发现云服务无法使用请自己搭建，[地址](https://github.com/Xander-C/brainHole_backend)
