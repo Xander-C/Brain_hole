@@ -17,12 +17,11 @@ import 'String2DateTime.dart';
 
 void main() => runApp(new MyStatelessApp());
 
-//Todo: 推送
 class MyStatelessApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new MaterialApp(
-        title: '为了小b的幸福',
+        title: '幸福清单',
         debugShowMaterialGrid: false,
         theme: new ThemeData(
           primaryColor: Color.fromRGBO(103, 119, 239, 1),
@@ -64,15 +63,15 @@ class MyAppState extends State<MyApp> {
     super.initState();
     initPlatformState();
     String userKey = "0";
-    print("init");
+    print("initState");
     print(userKey);
     _todoList = [TodoThing("添加第一个项目吧", DateTime(2077), false, false)];
     exp = 0;
     finishedList = [999];
     weatherUrl =
         'http://47.98.249.99:9092/?source=xw&weather_type=forecast_24h&province=江苏&city=南京&county=栖霞区';
-    print("before init");
     imageUrl = "assets/images/01.gif";
+    print("before init");
     init();
   }
 
@@ -82,7 +81,15 @@ class MyAppState extends State<MyApp> {
       jPush.addEventHandler(
           onReceiveNotification: (Map<String, dynamic> message) async {
         print(">>>>>>>>>>>>>>>>>flutter 接收到推送: $message");
-      });
+      },
+        onOpenNotification: (Map<String, dynamic> message) async{
+          setState(() {
+            imageUrl = imageUrl;
+            _todoList = _todoList;
+            finishedList = finishedList;
+            exp = exp;
+          });
+      },);
     } on Expression catch (e) {
       print("发生错误: $e");
     }
@@ -92,13 +99,16 @@ class MyAppState extends State<MyApp> {
   }
 
   void init() async {
+    print("async init");
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
+    print("got prefs main 97 async init");
     userKey = prefs.getString("userKey");
     if (userKey == null) {
       userKey = "0";
       prefs.setString("userKey", "0");
     }
+    print("userKey ="+ userKey +"main 103 async");
 
     String lastChangeString = prefs.getString("lastChange");
     if (lastChangeString == null) {
@@ -106,17 +116,13 @@ class MyAppState extends State<MyApp> {
       prefs.setString("lastChange", lastChange.toLocal().toString());
     } else
       lastChange = toDateTime(lastChangeString);
-    
+    print("lastChange ="+ lastChangeString +"main 111 async");
+
     String server = prefs.get("server");
     if(server == null){
-      prefs.setString("server", "192.168.1.23:9094");
+      prefs.setString("server", "47.98.249.99:9094");
     }
-
-    regId = prefs.getString("regId");
-    if (regId == null) {
-      regId = await jPush.getRegistrationID();
-      prefs.setString("regId", regId);
-    }
+    print("server = "+ server +"main 117 async init");
 
     List<String> _todoListString = prefs.getStringList("todoList");
     if (_todoListString == null) {
@@ -155,7 +161,7 @@ class MyAppState extends State<MyApp> {
     } else
       prefs.setStringList("todoList", []);
 
-    print("exp");
+    print("init exp main 157 async init");
     setState(() {
       exp = prefs.getInt("exp");
       if (exp == null) {
@@ -164,13 +170,14 @@ class MyAppState extends State<MyApp> {
       }
     });
 
-    print("weatherUrl");
+    print("init weatherUrl main 166 async init");
     weatherUrl = prefs.getString("weatherUrl");
     if (weatherUrl == null) {
       weatherUrl =
           'http://47.98.249.99:9092/?source=xw&weather_type=forecast_24h&province=江苏&city=南京&county=栖霞区';
       prefs.setString("weatherUrl", weatherUrl);
     }
+    print(weatherUrl);
     TodoThing notDone = _getNotDone(_todoList);
     if (notDone == null) {
       if (_todoList.isNotEmpty) {
@@ -198,6 +205,12 @@ class MyAppState extends State<MyApp> {
       talk = talk;
       exp = exp;
     });
+    regId = prefs.getString("regId");
+    if (regId == null) {
+      regId = await jPush.getRegistrationID();
+      prefs.setString("regId", regId);
+    }
+    print("regId = "+ regId +"main 124 async init");
   }
 
   TodoThing _getNotDone(List<TodoThing> _todoList) {
@@ -223,10 +236,13 @@ class MyAppState extends State<MyApp> {
       if ((dayWeatherCode >= 3 && dayWeatherCode <= 12) &&
           (nightWeatherCode >= 3 && nightWeatherCode <= 12)) {
         talk = "今天一天都有雨哦，去哪都不能忘了带伞";
+        imageUrl = "assets/images/rain.gif";
       } else if (dayWeatherCode >= 3 && dayWeatherCode <= 12) {
         talk = "今天白天有雨，白天出门记得带上伞哦";
+        imageUrl = "assets/images/rain.gif";
       } else if (nightWeatherCode >= 3 && nightWeatherCode <= 12) {
         talk = "今天晚上有雨，晚上出门记得带上伞哦";
+        imageUrl = "assets/images/rain.gif";
       } else if (_todoList.isNotEmpty) {
         talk = "还有一些事没做完，就现在完成它们吧!";
       } else if (int.parse(
@@ -260,7 +276,7 @@ class MyAppState extends State<MyApp> {
           return i.toString();
         }).toList());
     print(finishedList);
-    print("finished");
+    print("finished list main:265 longCallBack");
     setState(() {
       finishedList = finishedList;
       exp = exp;
@@ -339,20 +355,10 @@ class MyAppState extends State<MyApp> {
     });
   }
 
-  void _imageChange() async{
+  void _imageChange(){
     setState(() {
       imageUrl =
           "assets/images/0" + (random.nextInt(4) + 1).toString() + ".gif";
-    });
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await syncByCloud("wdnmdhhh");
-    print("!!!!!!!!!!!!!!!!!finished lIst");
-    print(prefs.getStringList("finishedList").toString());
-    setState(() {
-      finishedList = prefs.getStringList("finishedList").map((String str){
-        return int.parse(str);
-      }).toList();
-      exp = prefs.getInt("exp");
     });
   }
 

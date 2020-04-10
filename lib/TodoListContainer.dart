@@ -12,10 +12,6 @@ class TodoListContainer extends StatelessWidget {
   final CartChangedCallback undoneCallBack;
   @override
   Widget build(BuildContext context) {
-//    return Container(
-//      margin: EdgeInsets.all(0),
-//      width: 400,
-//      height: 505,
     return Expanded(
       child: ListView(
           physics: BouncingScrollPhysics(),

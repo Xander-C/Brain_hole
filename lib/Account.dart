@@ -61,7 +61,7 @@ class _AccountState extends State<Account> {
     });
     var dio = Dio();
     print("posting data");
-    var response = await dio.post('http://192.168.1.23:9094/login', data: data);
+    var response = await dio.post('http://'+ prefs.getString("server") +'/login', data: data);
     print(response.data);
     if (dateTimeReg.hasMatch(response.data.toString())) {
       showDialog(
@@ -178,7 +178,7 @@ class _AccountState extends State<Account> {
     });
     var dio = Dio();
     print("posting data");
-    var response = await dio.post('http://192.168.1.23:9094/reg', data: data);
+    var response = await dio.post('http://'+ prefs.getString("server") +'/reg', data: data);
     print(response.data);
     if (response.statusCode != 200) {
       showDialog(
@@ -277,176 +277,177 @@ class _AccountState extends State<Account> {
       ),
       body: Center(
           child: Column(children: <Widget>[
-        Expanded(
-          child: Container(),
-          flex: 1,
-        ),
-        userKey != "0"&& userKey != null
-            ? Container(
-                constraints: BoxConstraints.expand(height: 120, width: 350),
-                padding: EdgeInsets.only(left: 20, right: 20),
-                decoration: BoxDecoration(
-                    color: Colors.white,
-                    border: Border.all(
-                      color: Theme.of(context).primaryColor,
-                      style: BorderStyle.solid,
-                    ),
-                    borderRadius: BorderRadius.all(Radius.circular(5.0)),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black12,
-                        offset: Offset(-2.0, 2.0),
-                        blurRadius: 1.0,
-                      )
-                    ]),
-                child: Column(
-                  children: <Widget>[
-                    SizedBox(
-                      height: 10,
-                    ),
-                    Text(
-                      "当前账号",
-                      style: TextStyle(fontSize: 23),
-                    ),
-                    Container(
-                      color: Colors.black12,
-                      height: 1,
-                    ),
-                    ListTile(
-                      leading: CircleAvatar(
-                        backgroundColor: Theme.of(context).primaryColor,
-                        child: Text(userKey[0]),
+          Expanded(
+            child: Container(),
+            flex: 1,
+          ),
+          userKey != "0"&& userKey != null
+              ? Container(
+                  constraints: BoxConstraints.expand(height: 120, width: 350),
+                  padding: EdgeInsets.only(left: 20, right: 20),
+                  decoration: BoxDecoration(
+                      color: Colors.white,
+                      border: Border.all(
+                        color: Theme.of(context).primaryColor,
+                        style: BorderStyle.solid,
                       ),
-                      title: Text(userKey),
-                      trailing: GestureDetector(
-                        onTap: () {
-                          _logout();
-                        },
-                        child: Text(
-                          "退出登录",
-                          style:
-                              TextStyle(color: Theme.of(context).primaryColor),
+                      borderRadius: BorderRadius.all(Radius.circular(5.0)),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black12,
+                          offset: Offset(-2.0, 2.0),
+                          blurRadius: 1.0,
+                        )
+                      ]),
+                  child: Column(
+                    children: <Widget>[
+                      SizedBox(
+                        height: 10,
+                      ),
+                      Text(
+                        "当前账号",
+                        style: TextStyle(fontSize: 23),
+                      ),
+                      Container(
+                        color: Colors.black12,
+                        height: 1,
+                      ),
+                      ListTile(
+                        leading: CircleAvatar(
+                          backgroundColor: Theme.of(context).primaryColor,
+                          child: Text(userKey[0]),
+                        ),
+                        title: Text(userKey),
+                        trailing: GestureDetector(
+                          onTap: () {
+                            _logout();
+                          },
+                          child: Text(
+                            "退出登录",
+                            style:
+                                TextStyle(color: Theme.of(context).primaryColor),
+                          ),
                         ),
                       ),
-                    ),
-                  ],
-                ))
-            : Container(
-                constraints: BoxConstraints.expand(height: 350, width: 350),
-                padding: EdgeInsets.only(left: 20, right: 20),
-                decoration: BoxDecoration(
-                    color: Colors.white,
-                    border: Border.all(
-                      color: Theme.of(context).primaryColor,
-                      style: BorderStyle.solid,
-                    ),
-                    borderRadius: BorderRadius.all(Radius.circular(5.0)),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black12,
-                        offset: Offset(-2.0, 2.0),
-                        blurRadius: 1.0,
-                        //spreadRadius: 1.0,
-                      )
-                    ]),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Text(
-                      "登录/注册",
-                      style: TextStyle(fontSize: 25),
-                    ),
-                    Container(
-                      margin: EdgeInsets.fromLTRB(0, 10, 0, 0),
-                      height: 150,
-                      child: Image.asset(
-                        "assets/images/login.gif",
-                        fit: BoxFit.contain,
+                    ],
+                  ))
+              : Container(
+                  constraints: BoxConstraints.expand(height: 350, width: 350),
+                  padding: EdgeInsets.only(left: 20, right: 20),
+                  decoration: BoxDecoration(
+                      color: Colors.white,
+                      border: Border.all(
+                        color: Theme.of(context).primaryColor,
+                        style: BorderStyle.solid,
                       ),
-                    ),
-                    Container(
-                      margin: EdgeInsets.only(left: 20, right: 20),
-                      child: Form(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: <Widget>[
-                            TextFormField(
-                              controller: _userNameController,
-                              focusNode: _focusNodeUserName,
-                              keyboardType: TextInputType.text,
-                              decoration: InputDecoration(
-                                labelText: "用户名",
-                                hintText: "一个你认为独一无二的用户名",
-                                prefixIcon: Icon(Icons.person),
-                                suffixIcon: (_isShowClear)
-                                    ? IconButton(
-                                        icon: Icon(Icons.clear),
-                                        onPressed: () {
-                                          _userNameController.clear();
-                                        },
-                                      )
-                                    : null,
+                      borderRadius: BorderRadius.all(Radius.circular(5.0)),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black12,
+                          offset: Offset(-2.0, 2.0),
+                          blurRadius: 1.0,
+                          //spreadRadius: 1.0,
+                        )
+                      ]),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Text(
+                        "登录/注册",
+                        style: TextStyle(fontSize: 25),
+                      ),
+                      Container(
+                        margin: EdgeInsets.fromLTRB(0, 10, 0, 0),
+                        height: 150,
+                        child: Image.asset(
+                          "assets/images/login.gif",
+                          fit: BoxFit.contain,
+                        ),
+                      ),
+                      Container(
+                        margin: EdgeInsets.only(left: 20, right: 20),
+                        child: Form(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: <Widget>[
+                              TextFormField(
+                                controller: _userNameController,
+                                focusNode: _focusNodeUserName,
+                                keyboardType: TextInputType.text,
+                                decoration: InputDecoration(
+                                  labelText: "用户名",
+                                  hintText: "一个你认为独一无二的用户名",
+                                  prefixIcon: Icon(Icons.person),
+                                  suffixIcon: (_isShowClear)
+                                      ? IconButton(
+                                          icon: Icon(Icons.clear),
+                                          onPressed: () {
+                                            _userNameController.clear();
+                                          },
+                                        )
+                                      : null,
+                                ),
                               ),
-                            ),
-                            Container(
-                                margin: EdgeInsets.fromLTRB(0, 10, 0, 0),
-                                height: 45.0,
-                                child: Row(
-                                  children: <Widget>[
-                                    Expanded(
-                                      child: RaisedButton(
-                                        color: Theme.of(context).primaryColor,
-                                        child: Text(
-                                          "登录",
-                                          style: TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 18),
+                              Container(
+                                  margin: EdgeInsets.fromLTRB(0, 10, 0, 0),
+                                  height: 45.0,
+                                  child: Row(
+                                    children: <Widget>[
+                                      Expanded(
+                                        child: RaisedButton(
+                                          color: Theme.of(context).primaryColor,
+                                          child: Text(
+                                            "登录",
+                                            style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 18),
+                                          ),
+                                          shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(10.0)),
+                                          onPressed: () {
+                                            _login(_userNameController.text);
+                                            _focusNodeUserName.unfocus();
+                                          },
                                         ),
-                                        shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(10.0)),
-                                        onPressed: () {
-                                          _login(_userNameController.text);
-                                          _focusNodeUserName.unfocus();
-                                        },
                                       ),
-                                    ),
-                                    SizedBox(
-                                      width: 10,
-                                    ),
-                                    Expanded(
-                                      child: RaisedButton(
-                                        color: Theme.of(context).primaryColor,
-                                        child: Text(
-                                          "注册",
-                                          style: TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 18),
+                                      SizedBox(
+                                        width: 10,
+                                      ),
+                                      Expanded(
+                                        child: RaisedButton(
+                                          color: Theme.of(context).primaryColor,
+                                          child: Text(
+                                            "注册",
+                                            style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 18),
+                                          ),
+                                          shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(10.0)),
+                                          onPressed: () {
+                                            _focusNodeUserName.unfocus();
+                                            _register(_userNameController.text);
+                                          },
                                         ),
-                                        shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(10.0)),
-                                        onPressed: () {
-                                          _focusNodeUserName.unfocus();
-                                          _register(_userNameController.text);
-                                        },
                                       ),
-                                    ),
-                                  ],
-                                ))
-                          ],
+                                    ],
+                                  ))
+                            ],
+                          ),
                         ),
-                      ),
-                    )
-                  ],
+                      )
+                    ],
+                  ),
                 ),
-              ),
-        Expanded(
-          child: Container(),
-          flex: userKey != "0" ? 4 : 2,
-        ),
-      ])),
+          Expanded(
+            child: Container(),
+            flex: userKey != "0" ? 4 : 2,
+          ),
+        ])
+      ),
     );
   }
 }

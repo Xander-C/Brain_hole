@@ -22,7 +22,7 @@ class Setting extends StatelessWidget {
         title: Text("设置"),
         centerTitle: true,
       ),
-      body: Column(
+      body: ListView(children: <Widget>[ Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
           Center(
@@ -146,7 +146,7 @@ class Setting extends StatelessWidget {
                 )),
           )
         ],
-      ),
+      ),],)
     );
   }
 }
