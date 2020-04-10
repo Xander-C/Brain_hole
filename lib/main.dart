@@ -396,7 +396,7 @@ class MyAppState extends State<MyApp> {
   void _imageChange(){
     setState(() {
       imageUrl =
-          "assets/images/0" + (random.nextInt(4) + 1).toString() + ".gif";
+          "assets/images/0" + (random.nextInt(exp>100?4:6) + 1).toString() + ".gif";
     });
   }
 

@@ -149,7 +149,7 @@ class _CityContainerState extends State<CityContainer> {
                 margin: EdgeInsets.fromLTRB(0, 10, 0, 10),
                 child: Text(
                   suc?"提交成功":"提交错误",
-                  style: TextStyle(fontSize: 28),
+                  style: TextStyle(fontSize: 28, color: Colors.black),
                 ),
               ),
               Text(dialog, style: TextStyle(fontSize: 20),)
