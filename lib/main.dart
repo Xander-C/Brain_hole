@@ -323,6 +323,7 @@ class MyAppState extends State<MyApp> {
           return json.encode(todo);
         }).toList());
     lastChange = DateTime.now();
+    prefs.setString("lastChange", lastChange.toLocal().toString());
     FormData data = FormData.fromMap({
       'userKey': getMd5(userKey),
       'todoList': _todoList
@@ -606,7 +607,7 @@ class MyAppState extends State<MyApp> {
                 IconButton(
                     icon:Icon(Icons.refresh),
                     onPressed: () {
-                     init();
+                     refresh();
                     }),
               ],
               //leading: SettingBtn(),
