@@ -73,6 +73,9 @@ class MyAppState extends State<MyApp> {
     imageUrl = "assets/images/01.gif";
     print("before init");
     init();
+    print("end of init main 76 inistate");
+    print(exp);
+    print(finishedList);
   }
 
   Future<void> initPlatformState() async {
@@ -98,6 +101,15 @@ class MyAppState extends State<MyApp> {
     }
   }
 
+  void refresh(){
+    print("refresh 105");
+    setState(() {
+      finishedList =finishedList;
+      _todoList = _todoList;
+      exp = exp;
+    });
+  }
+
   void init() async {
     print("async init");
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -118,11 +130,32 @@ class MyAppState extends State<MyApp> {
       lastChange = toDateTime(lastChangeString);
     print("lastChange ="+ lastChangeString +"main 111 async");
 
-    String server = prefs.get("server");
+    String server = await prefs.get("server");
     if(server == null){
       prefs.setString("server", "47.98.249.99:9094");
     }
     print("server = "+ server +"main 117 async init");
+
+
+//    List<String> finishedListString = prefs.getStringList("finishedList");
+//    if (finishedListString == null) {
+//      finishedList = [999];
+//      prefs.setStringList(
+//          "finishedList",
+//    finishedList.map((int i) {
+//            return i.toString();
+//          }).toList());
+//      setState(() {
+//    finishedList = finishedList;
+//      });
+//    } else {
+//      setState(() {
+//        finishedList = finishedListString.map((String todoStr) {
+//          return int.parse(todoStr);
+//        }).toList();
+//      });
+//    }
+
 
     List<String> _todoListString = prefs.getStringList("todoList");
     if (_todoListString == null) {
@@ -149,26 +182,32 @@ class MyAppState extends State<MyApp> {
         "添加第一个项目吧", DateTime.now().add(Duration(days: 3)), false, false)
     ));
     print(_todoListString);
+
+
     List<String> _finishedListString = prefs.getStringList("finishedList");
     print("finishedList");
     print(_finishedListString);
-    if (_finishedListString != null && _finishedListString.length != 0) {
+    if (_finishedListString != null) {
       setState(() {
         finishedList = _finishedListString.map((String finishedStr) {
           return int.parse(finishedStr);
         }).toList();
       });
     } else
-      prefs.setStringList("todoList", []);
+      prefs.setStringList("finishedList", ["999"]);
+    print(finishedList);
 
-    print("init exp main 157 async init");
     setState(() {
       exp = prefs.getInt("exp");
+      print(exp);
+      print("main init async 198");
+      finishedList = finishedList;
       if (exp == null) {
         prefs.setInt("exp", 0);
         exp = 0;
       }
     });
+    print("init exp = " + exp.toString() + " main 178 async init");
 
     print("init weatherUrl main 166 async init");
     weatherUrl = prefs.getString("weatherUrl");
@@ -200,17 +239,13 @@ class MyAppState extends State<MyApp> {
       }
       exp -= 30;
     }
-    setState(() {
-      imageUrl = imageUrl;
-      talk = talk;
-      exp = exp;
-    });
     regId = prefs.getString("regId");
     if (regId == null) {
       regId = await jPush.getRegistrationID();
       prefs.setString("regId", regId);
     }
-    print("regId = "+ regId +"main 124 async init");
+    print("regId = "+ regId +"main 250 async init");
+    refresh();
   }
 
   TodoThing _getNotDone(List<TodoThing> _todoList) {
@@ -355,10 +390,19 @@ class MyAppState extends State<MyApp> {
     });
   }
 
-  void _imageChange(){
+  void _imageChange()async{
+    SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       imageUrl =
           "assets/images/0" + (random.nextInt(4) + 1).toString() + ".gif";
+    });
+    print(finishedList);
+    print("这个是更改图片时的finishedlist");
+    setState(() {
+      finishedList = prefs.getStringList("finishedList").map((String i){
+        return int.parse(i);
+      }).toList();
+      print(finishedList);
     });
   }
 

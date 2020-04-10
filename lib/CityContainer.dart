@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as Http;
 import 'dart:convert';
+import 'package:dio/dio.dart';
 
+import 'String2DateTime.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class CityContainer extends StatefulWidget {
@@ -98,6 +100,16 @@ class _CityContainerState extends State<CityContainer> {
       print(weatherData["data"]);
       if(weatherData != null && weatherData["data"] != null && weatherData["data"]["forecast_24h"] != null){
         SharedPreferences prefs = await SharedPreferences.getInstance();
+        prefs.setString("lastChange", DateTime.now().toLocal().toString());
+        FormData data = FormData.fromMap({
+          'userKey': getMd5(prefs.getString("userKey")),
+          'weatherUrl': url,
+          'lastChange': prefs.getString("lastChange"),
+        });
+        var dio = Dio();
+        print("posting data");
+        var response = await dio.post('http://'+ prefs.getString("server") +'/update', data: data);
+        print("post to" + prefs.getString("server"));
         prefs.setString("weatherUrl", url);
         showDialog(
             context: context,

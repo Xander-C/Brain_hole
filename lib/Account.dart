@@ -179,6 +179,7 @@ class _AccountState extends State<Account> {
     var dio = Dio();
     print("posting data");
     var response = await dio.post('http://'+ prefs.getString("server") +'/reg', data: data);
+    print("post to" + prefs.getString("server"));
     print(response.data);
     if (response.statusCode != 200) {
       showDialog(
@@ -227,7 +228,7 @@ class _AccountState extends State<Account> {
                   setState(() {
                     userKey = _userKey;
                   });
-                  prefs.setString("userKey", userKey);
+                  prefs.setString("userKey", _userKey);
                   Navigator.of(context).pop();
                   Navigator.of(context).pop();
                 },
