@@ -54,6 +54,10 @@
 
 <img src="./images/05.jpg" height=400px>
 
+# 已知bug
+
+* 安装后首次打开可能会无法使用一些功能，请安装后多重启几次app。
+
 
 
 如若发现云服务无法使用请自己搭建，[地址](https://github.com/Xander-C/brainHole_backend)
