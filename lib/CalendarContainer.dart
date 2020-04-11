@@ -156,6 +156,7 @@ class CalendarContainer extends StatelessWidget {
   Container _buildFavorRow(int exp, BuildContext context) {
 
     int _getLevel(int exp, int level){
+      if(exp<0) return -1;
       if(exp<pow(5,level)) return level;
       return _getLevel(exp, level + 1);
     }

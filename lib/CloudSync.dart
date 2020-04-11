@@ -17,6 +17,12 @@ class _CloudSyncState extends State<CloudSync> {
   String userKey;
   String localTimeString;
 
+  void fresh(){
+    setState(() {
+      isSync=isSync;
+    });
+  }
+
   void check()async{
     SharedPreferences prefs = await SharedPreferences.getInstance();
     userKey = prefs.getString("userKey");
@@ -118,9 +124,7 @@ class _CloudSyncState extends State<CloudSync> {
         },
       );
     }
-    setState(() {
-      isSync=isSync;
-    });
+    fresh();
   }
 
   @override

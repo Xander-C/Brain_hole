@@ -109,6 +109,10 @@ class MyAppState extends State<MyApp> {
         return int.parse(i);
       }).toList();
       exp = prefs.getInt("exp");
+      _todoList = prefs.getStringList("todoList").map((String todoStr) {
+        return TodoThing.fromJson(json.decode(todoStr));
+      }).toList();
+      imageUrl = imageUrl;
     });
   }
 
@@ -226,11 +230,13 @@ class MyAppState extends State<MyApp> {
           talk = "加油加油！快要全部完成了，再坚持一会儿";
         else if (_todoList.length <= 8)
           talk = "任务量适中，赶紧努力去完成吧";
-        else if (_todoList.length > 8) talk = "今天任务量有点艰巨，努力去完成吧";
+        else if (_todoList.length > 8) talk = "今天任务量有点艰巨，努力去完成吧" ;
         imageUrl = "assets/images/study.gif";
       }
       _setWeatherTalk();
     } else {
+      print(jsonEncode(notDone));
+      print("not done");
       if (finishedList.contains(notDone.deadline.day)) {
         finishedList.remove(notDone.deadline.day);
       }
@@ -252,7 +258,7 @@ class MyAppState extends State<MyApp> {
   TodoThing _getNotDone(List<TodoThing> _todoList) {
     int len = _todoList.length;
     for (int i = 0; i < len; i++)
-      if (_todoList[i].deadline.isAfter(DateTime.now())) return _todoList[i];
+      if (_todoList[i].deadline.isBefore(DateTime.now())) return _todoList[i];
     return null;
   }
 
@@ -288,6 +294,7 @@ class MyAppState extends State<MyApp> {
         imageUrl = "assets/images/hot.gif";
       }
     }
+    refresh();
   }
 
   bool _allLong(List<TodoThing> _todoList) {
